@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Http\JsonResponse;
 
 class AuthenticationController extends Controller
 {
+
     /**
      * Create a new AuthController instance.
      * Set middleware for logout & account functions
@@ -39,15 +39,17 @@ class AuthenticationController extends Controller
             'avatar' => ['nullable', 'string'],
         ]);
 
+        $credentials = request(['email', 'password']);
+
         $user = User::create([
-            'avatar' => $request->avatar,
-            'username' => $request->username,
-            'email' => $request->email,
-            'contact' => $request->contact,
+            'email' => request('email'),
+            'avatar' => request('avatar'),
+            'contact' => request('contact'),
+            'username' => request('username'),
             'password' => Hash::make($request->password),
         ]);
 
-        $token = Auth::login($user);
+        $token = Auth()->attempt($credentials);
 
         return response()->json([
             'message' => 'User created successfully',
@@ -68,18 +70,18 @@ class AuthenticationController extends Controller
         $emailCred = $request->only('email', 'password');
         $userCred = $request->only('username', 'password');
 
-        if ($token = Auth::setTTL($request->stay ? 10800 : 3600)->attempt($emailCred)) {
+        if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($emailCred)) {
 
-            $user = Auth::user();
+            $user = Auth()->user();
 
             return response()->json([
                 'message' => 'User logged in successfully by email',
                 'token' => $token,
                 'account' => $user,
             ], 200);
-        } else if ($token = Auth::setTTL($request->stay ? 10800 : 3600)->attempt($userCred)) {
+        } else if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($userCred)) {
 
-            $user = Auth::user();
+            $user = Auth()->user();
 
             return response()->json([
                 'message' => 'User logged in successfully by username',
@@ -100,7 +102,7 @@ class AuthenticationController extends Controller
      */
     public function logout(): JsonResponse
     {
-        Auth::logout();
+        Auth()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
     }

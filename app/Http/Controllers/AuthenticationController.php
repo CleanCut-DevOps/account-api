@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class AuthenticationController extends Controller
 {
@@ -25,19 +26,29 @@ class AuthenticationController extends Controller
     /**
      * Get a JWT via given credentials.
      *
-     * @param  Request $request
+     * @param Request $request
      *
      * @return JsonResponse
      */
     public function register(Request $request): JsonResponse
     {
-        $request->validate([
+        $validationRules = [
             'username' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'contact' => ['required', 'string', 'max:255'],
-            'password' => ['required', Rules\Password::defaults()],
+            'password' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
             'avatar' => ['nullable', 'string'],
-        ]);
+        ];
+
+        $validator = Validator::make(request()->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "type" => "Invalid data",
+                "message" => "The data provided in the request is invalid",
+                "errorFields" => $validator->errors()->messages()
+            ], 422);
+        }
 
         $credentials = request(['email', 'password']);
 
@@ -61,7 +72,7 @@ class AuthenticationController extends Controller
     /**
      * Login user and create token
      *
-     * @param  Request $request
+     * @param Request $request
      *
      * @return JsonResponse
      */
@@ -105,5 +116,47 @@ class AuthenticationController extends Controller
         Auth()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    /**
+     * Reset the user's password.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validationRules = [
+            'newPassword' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
+            'oldPassword' => ['required', Password::default()],
+        ];
+
+        $validator = Validator::make(request()->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "type" => "Invalid data",
+                "message" => "The data provided in the request is invalid",
+                "errorFields" => $validator->errors()->messages()
+            ], 422);
+        }
+
+        $authUser = Auth()->user();
+
+        $user = User::find($authUser->id);
+
+        if (Hash::check($request->oldPassword, $user->password)) {
+            $user->password = Hash::make($request->newPassword);
+            $user->save();
+
+            return response()->json([
+                'message' => 'Password changed successfully'
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
     }
 }

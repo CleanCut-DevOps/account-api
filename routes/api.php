@@ -29,3 +29,4 @@ Route::post('reset', [AuthenticationController::class, 'resetPassword']);
 // User Account
 Route::get('account', [AccountController::class, 'read']);
 Route::put('account', [AccountController::class, 'update']);
+Route::delete('account', [AccountController::class, 'delete']);

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\user;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use PHPOpenSourceSaver\JWTAuth\Contracts\Providers\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AccountController extends Controller
 {
@@ -29,39 +29,47 @@ class AccountController extends Controller
     {
         $user = Auth()->user();
 
-        return response()->json($user, 200);
+        return response()->json($user);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param  User  $user
      * @return JSONResponse
      */
-    public function update(Request $request, User $user): JSONResponse
+    public function update(Request $request): JSONResponse
     {
-        $request->validate([
+        $validationRules = [
             'avatar' => ['nullable', 'string'],
-            'username' => ['nullable', 'string', 'max:48', 'unique:users'],
-            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
-            'description' => ['nullable', 'string'],
-        ]);
+            'username' => ['nullable', 'string', 'max:48'],
+            'email' => ['nullable', 'string', 'email', 'max:255'],
+            'contact' => ['nullable', 'string'],
+        ];
+
+        $validator = Validator::make(request()->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "type" => "Invalid data",
+                "message" => "The data provided in the request is invalid",
+                "errorFields" => $validator->errors()->messages()
+            ], 422);
+        }
 
         $authUser = Auth()->user();
 
         $user = User::find($authUser->id);
 
-        if (!empty($request->username)) $user->username = $request->username;
-        if (!empty($request->contact)) $user->contact = $request->contact;
-        if (!empty($request->avatar)) $user->avatar = $request->avatar;
-        if (!empty($request->email)) $user->email = $request->email;
+        if (!empty($request->username) && $user->username != $request->username) $user->username = $request->username;
+        if (!empty($request->contact) && $user->contact != $request->contact) $user->contact = $request->contact;
+        if (!empty($request->avatar) && $user->avatar != $request->avatar) $user->avatar = $request->avatar;
+        if (!empty($request->email) && $user->email != $request->email) $user->email = $request->email;
 
         $user->save();
 
         return response()->json([
             'message' => 'User updated successfully',
-            'token' => $user->getJWTIdentifier(),
             'account' => $user
         ], 201);
     }
@@ -69,11 +77,17 @@ class AccountController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  user  $user
      * @return JSONResponse
      */
-    public function delete(user $user): JsonResponse
+    public function delete(): JsonResponse
     {
-        return response()->json(['message' => 'TODO: Method to delete user profile'], 404);
+        $authUser = Auth()->user();
+
+        $user = User::find($authUser->id);
+
+        Auth()->logout();
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully'], 200);
     }
 }

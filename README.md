@@ -6,9 +6,18 @@ Responsible for storing and managing user information, as well as verifying the 
 
 # Installation
 
+Before cloning the repository:
+- create a `user_accounts` schema in your MySQL database
+
 Upon cloning this repository:
-- run `composer update` then `composer install` to generate depedencies in vendor folder
+- `cd` into the repository
+- run `composer update` then `composer install` to generate dependencies in the vendor folder
 - change `.env.example` to `.env`
 - run `php artisan key:generate`
-- configure `.env` with MySQL configurations
+- configure the `.env`  with your MySQL configurations
 
+# Usage
+
+Upon installation:
+- run `php artisan migrate:fresh` to create tables in database
+- run `php artisan serve --port=8001` to start the server on a local environment

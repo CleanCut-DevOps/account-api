@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\ValidateUpdate;
 use App\Models\user;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class AccountController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api');
+        $this->middleware(ValidateUpdate::class)->only('update');
     }
 
     /**
@@ -40,31 +42,14 @@ class AccountController extends Controller
      */
     public function update(Request $request): JSONResponse
     {
-        $validationRules = [
-            'avatar' => ['nullable', 'string'],
-            'username' => ['nullable', 'string', 'max:48'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
-            'contact' => ['nullable', 'string'],
-        ];
-
-        $validator = Validator::make(request()->all(), $validationRules);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "type" => "Invalid data",
-                "message" => "The data provided in the request is invalid",
-                "errorFields" => $validator->errors()->messages()
-            ], 422);
-        }
-
         $authUser = Auth()->user();
 
         $user = User::find($authUser->id);
 
-        if (!empty($request->username) && $user->username != $request->username) $user->username = $request->username;
-        if (!empty($request->contact) && $user->contact != $request->contact) $user->contact = $request->contact;
-        if (!empty($request->avatar) && $user->avatar != $request->avatar) $user->avatar = $request->avatar;
-        if (!empty($request->email) && $user->email != $request->email) $user->email = $request->email;
+        if (!empty($request->username)) $user->username = $request->username;
+        if (!empty($request->contact)) $user->contact = $request->contact;
+        if (!empty($request->avatar)) $user->avatar = $request->avatar;
+        if (!empty($request->email)) $user->email = $request->email;
 
         $user->save();
 

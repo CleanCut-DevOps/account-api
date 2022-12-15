@@ -21,8 +21,8 @@ class ValidateLogin
         try {
             $request->validate([
                 'stay' => ['required', 'boolean'],
-                'email' => ['required_unless:username,null', 'email', 'max:255'],
-                'username' => ['required_unless:email,null'],
+                'email' => ['required_if:username,null', 'email', 'max:255'],
+                'username' => ['required_if:email,null'],
                 'password' => ['required', 'string', 'min:8'],
             ]);
 

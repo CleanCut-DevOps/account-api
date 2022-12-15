@@ -19,9 +19,10 @@ class CreateUsersTable extends Migration
             $table->uuid('id')->primary();
             $table->string('username', 48)->unique();
             $table->string('email')->unique();
-            $table->string('contact');
             $table->string('password');
+            $table->string('contact');
             $table->text('avatar')->nullable();
+            $table->enum('type', ['admin', 'cleaner', 'user'])->default('user');
             $table->softDeletes();
             $table->timestamps();
         });

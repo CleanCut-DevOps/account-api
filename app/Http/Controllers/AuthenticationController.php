@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\ValidateLogin;
+use App\Http\Middleware\ValidateRegister;
+use App\Http\Middleware\ValidateReset;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
 
 class AuthenticationController extends Controller
 {
@@ -21,6 +22,10 @@ class AuthenticationController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware(ValidateRegister::class)->only('register');
+        $this->middleware(ValidateLogin::class)->only('login');
+        $this->middleware(ValidateReset::class)->only('resetPassword');
+
     }
 
     /**
@@ -32,24 +37,6 @@ class AuthenticationController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
-        $validationRules = [
-            'username' => ['required', 'string', 'max:255', 'unique:users'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'contact' => ['required', 'string', 'max:255'],
-            'password' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
-            'avatar' => ['nullable', 'string'],
-        ];
-
-        $validator = Validator::make(request()->all(), $validationRules);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "type" => "Invalid data",
-                "message" => "The data provided in the request is invalid",
-                "errorFields" => $validator->errors()->messages()
-            ], 422);
-        }
-
         $credentials = request(['email', 'password']);
 
         $user = User::create([
@@ -127,21 +114,6 @@ class AuthenticationController extends Controller
      */
     public function resetPassword(Request $request): JsonResponse
     {
-        $validationRules = [
-            'newPassword' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
-            'oldPassword' => ['required', Password::default()],
-        ];
-
-        $validator = Validator::make(request()->all(), $validationRules);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "type" => "Invalid data",
-                "message" => "The data provided in the request is invalid",
-                "errorFields" => $validator->errors()->messages()
-            ], 422);
-        }
-
         $authUser = Auth()->user();
 
         $user = User::find($authUser->id);

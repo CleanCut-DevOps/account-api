@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\ValidateJWT;
 use App\Http\Middleware\ValidateUpdate;
 use App\Models\user;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class AccountController extends Controller
 {
@@ -18,8 +18,8 @@ class AccountController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api');
-        $this->middleware(ValidateUpdate::class)->only('update');
+        $this->middleware(ValidateJWT::class);
+        $this->middleware(ValidateUpdate::class)->only("update");
     }
 
     /**
@@ -54,8 +54,9 @@ class AccountController extends Controller
         $user->save();
 
         return response()->json([
-            'message' => 'User updated successfully',
-            'account' => $user
+            "type" => "Successful request",
+            "message" => "User updated successfully",
+            "account" => $user
         ], 201);
     }
 
@@ -73,6 +74,9 @@ class AccountController extends Controller
         Auth()->logout();
         $user->delete();
 
-        return response()->json(['message' => 'User deleted successfully'], 200);
+        return response()->json([
+            "type" => "Successful request",
+            "message" => "User deleted successfully"
+        ], 200);
     }
 }

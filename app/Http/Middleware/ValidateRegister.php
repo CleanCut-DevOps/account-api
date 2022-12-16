@@ -30,10 +30,14 @@ class ValidateRegister
 
             return $next($request);
         } catch (\Exception $e) {
+            $errors = collect($e->errors());
+
             return response()->json([
                 "type" => "Invalid data",
                 "message" => "The data provided in the request is invalid",
-                "errorFields" => $e->errors(),
+                "errors" => $errors->map(function ($error) {
+                    return $error[0];
+                }),
             ], 422);
         }
     }

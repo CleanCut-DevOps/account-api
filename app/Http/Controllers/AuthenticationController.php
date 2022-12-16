@@ -73,6 +73,7 @@ class AuthenticationController extends Controller
             $user = Auth()->user();
 
             return response()->json([
+                "type" => "Successful request",
                 'message' => 'User logged in successfully by email',
                 'token' => $token,
                 'account' => $user,
@@ -82,12 +83,14 @@ class AuthenticationController extends Controller
             $user = Auth()->user();
 
             return response()->json([
+                "type" => "Successful request",
                 'message' => 'User logged in successfully by username',
                 'token' => $token,
                 'account' => $user,
             ], 200);
         } else {
             return response()->json([
+                "type" => "Unauthorized",
                 'message' => 'Invalid credentials'
             ], 401);
         }

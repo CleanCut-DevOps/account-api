@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\ValidateJWT;
 use App\Http\Middleware\ValidateLogin;
 use App\Http\Middleware\ValidateRegister;
 use App\Http\Middleware\ValidateReset;
@@ -21,11 +22,10 @@ class AuthenticationController extends Controller
      */
     public function __construct()
     {
-        $this->middleware("auth:api", ["except" => ["login", "register"]]);
+        $this->middleware(ValidateJWT::class, ["except" => ["login", "register"]]);
         $this->middleware(ValidateRegister::class)->only("register");
         $this->middleware(ValidateLogin::class)->only("login");
         $this->middleware(ValidateReset::class)->only("resetPassword");
-
     }
 
     /**
@@ -102,7 +102,10 @@ class AuthenticationController extends Controller
     {
         Auth()->logout();
 
-        return response()->json(["message" => "Successfully logged out"]);
+        return response()->json([
+            "type" => "Successful request",
+            "message" => "User logged out successfully"
+        ], 200);
     }
 
     /**
@@ -123,11 +126,13 @@ class AuthenticationController extends Controller
             $user->save();
 
             return response()->json([
+                "type" => "Successful request",
                 "message" => "Password changed successfully"
             ], 200);
         } else {
             return response()->json([
-                "message" => "Invalid credentials"
+                "type" => "Invalid data",
+                "message" => "Request data is invalid"
             ], 401);
         }
     }

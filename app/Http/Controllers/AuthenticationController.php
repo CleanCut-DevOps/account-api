@@ -21,10 +21,10 @@ class AuthenticationController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
-        $this->middleware(ValidateRegister::class)->only('register');
-        $this->middleware(ValidateLogin::class)->only('login');
-        $this->middleware(ValidateReset::class)->only('resetPassword');
+        $this->middleware("auth:api", ["except" => ["login", "register"]]);
+        $this->middleware(ValidateRegister::class)->only("register");
+        $this->middleware(ValidateLogin::class)->only("login");
+        $this->middleware(ValidateReset::class)->only("resetPassword");
 
     }
 
@@ -37,22 +37,19 @@ class AuthenticationController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
-        $credentials = request(['email', 'password']);
+        $credentials = request(["email", "password"]);
 
-        $user = User::create([
-            'email' => request('email'),
-            'avatar' => request('avatar'),
-            'contact' => request('contact'),
-            'username' => request('username'),
-            'password' => Hash::make($request->password),
-        ]);
+        $request['password'] = Hash::make($request->password);
+
+        $user = User::create($request->all());
 
         $token = Auth()->attempt($credentials);
 
         return response()->json([
-            'message' => 'User created successfully',
-            'token' => $token,
-            'account' => $user
+            "type" => "Successful request",
+            "message" => "User created successfully",
+            "token" => $token,
+            "account" => $user
         ], 201);
     }
 
@@ -65,8 +62,8 @@ class AuthenticationController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $emailCred = $request->only('email', 'password');
-        $userCred = $request->only('username', 'password');
+        $emailCred = $request->only("email", "password");
+        $userCred = $request->only("username", "password");
 
         if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($emailCred)) {
 
@@ -74,9 +71,9 @@ class AuthenticationController extends Controller
 
             return response()->json([
                 "type" => "Successful request",
-                'message' => 'User logged in successfully by email',
-                'token' => $token,
-                'account' => $user,
+                "message" => "User logged in successfully by email",
+                "token" => $token,
+                "account" => $user,
             ], 200);
         } else if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($userCred)) {
 
@@ -84,14 +81,14 @@ class AuthenticationController extends Controller
 
             return response()->json([
                 "type" => "Successful request",
-                'message' => 'User logged in successfully by username',
-                'token' => $token,
-                'account' => $user,
+                "message" => "User logged in successfully by username",
+                "token" => $token,
+                "account" => $user,
             ], 200);
         } else {
             return response()->json([
                 "type" => "Unauthorized",
-                'message' => 'Invalid credentials'
+                "message" => "Invalid credentials"
             ], 401);
         }
     }
@@ -105,11 +102,11 @@ class AuthenticationController extends Controller
     {
         Auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(["message" => "Successfully logged out"]);
     }
 
     /**
-     * Reset the user's password.
+     * Reset the user"s password.
      *
      * @param Request $request
      *
@@ -126,11 +123,11 @@ class AuthenticationController extends Controller
             $user->save();
 
             return response()->json([
-                'message' => 'Password changed successfully'
+                "message" => "Password changed successfully"
             ], 200);
         } else {
             return response()->json([
-                'message' => 'Invalid credentials'
+                "message" => "Invalid credentials"
             ], 401);
         }
     }

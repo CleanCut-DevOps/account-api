@@ -31,7 +31,11 @@ class AccountController extends Controller
     {
         $user = Auth()->user();
 
-        return response()->json($user);
+        return response()->json([
+            "type" => "Successful request",
+            "message" => "Account details retrieved successfully",
+            "account" => $user,
+        ]);
     }
 
     /**

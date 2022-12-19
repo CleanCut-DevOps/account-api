@@ -59,9 +59,9 @@ class AccountController extends Controller
 
         return response()->json([
             "type" => "Successful request",
-            "message" => "User updated successfully",
+            "message" => "Account details updated successfully",
             "account" => $user
-        ], 201);
+        ]);
     }
 
     /**
@@ -80,7 +80,7 @@ class AccountController extends Controller
 
         return response()->json([
             "type" => "Successful request",
-            "message" => "User deleted successfully"
-        ], 200);
+            "message" => "Account deleted successfully"
+        ]);
     }
 }

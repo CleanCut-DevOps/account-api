@@ -16,7 +16,7 @@ class AuthenticationController extends Controller
 
     /**
      * Create a new AuthController instance.
-     * Set middleware for logout & account functions
+     * Set middleware for all functions
      *
      * @return void
      */
@@ -26,31 +26,6 @@ class AuthenticationController extends Controller
         $this->middleware(ValidateRegister::class)->only("register");
         $this->middleware(ValidateLogin::class)->only("login");
         $this->middleware(ValidateReset::class)->only("resetPassword");
-    }
-
-    /**
-     * Get a JWT via given credentials.
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function register(Request $request): JsonResponse
-    {
-        $credentials = request(["email", "password"]);
-
-        $request['password'] = Hash::make($request->password);
-
-        $user = User::create($request->all());
-
-        $token = Auth()->attempt($credentials);
-
-        return response()->json([
-            "type" => "Successful request",
-            "message" => "User created successfully",
-            "token" => $token,
-            "account" => $user
-        ], 201);
     }
 
     /**
@@ -66,24 +41,16 @@ class AuthenticationController extends Controller
         $userCred = $request->only("username", "password");
 
         if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($emailCred)) {
-
-            $user = Auth()->user();
-
             return response()->json([
                 "type" => "Successful request",
-                "message" => "User logged in successfully by email",
+                "message" => "User logged in successfully",
                 "token" => $token,
-                "account" => $user,
             ], 200);
         } else if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($userCred)) {
-
-            $user = Auth()->user();
-
             return response()->json([
                 "type" => "Successful request",
-                "message" => "User logged in successfully by username",
+                "message" => "User logged in successfully",
                 "token" => $token,
-                "account" => $user,
             ], 200);
         } else {
             return response()->json([
@@ -91,6 +58,30 @@ class AuthenticationController extends Controller
                 "message" => "Invalid credentials"
             ], 401);
         }
+    }
+
+    /**
+     * Get a JWT via given credentials.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $credentials = request(["email", "password"]);
+
+        $request['password'] = Hash::make($request->password);
+
+        User::create($request->all());
+
+        $token = Auth()->attempt($credentials);
+
+        return response()->json([
+            "type" => "Successful request",
+            "message" => "User created successfully",
+            "token" => $token
+        ], 201);
     }
 
     /**

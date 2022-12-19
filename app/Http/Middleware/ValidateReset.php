@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class ValidateReset
 {
@@ -26,12 +27,14 @@ class ValidateReset
             ]);
 
             return $next($request);
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
+            $errors = array_merge(...array_values($e->errors()));
+
             return response()->json([
                 "type" => "Invalid data",
-                "message" => "The data provided in the request is invalid",
-                "errorFields" => $e->errors(),
-            ], 422);
+                "message" => $e->getMessage(),
+                "errors" => $errors,
+            ], 400);
         }
     }
 }

@@ -3,10 +3,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\JSONResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\JSONResponse;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ValidateLogin
 {
@@ -28,16 +29,14 @@ class ValidateLogin
             ]);
 
             return $next($request);
-        } catch (\Exception $e) {
-            $errors = collect($e->errors());
+        } catch (ValidationException $e) {
+            $errors = array_merge(...array_values($e->errors()));
 
             return response()->json([
                 "type" => "Invalid data",
-                "message" => "The data provided in the request is invalid",
-                "errors" => $errors->map(function ($error) {
-                    return $error[0];
-                }),
-            ], 422);
+                "message" => $e->getMessage(),
+                "errors" => $errors,
+            ], 400);
         }
     }
 }

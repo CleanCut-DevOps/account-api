@@ -16,7 +16,7 @@ class AuthenticationController extends Controller
 
     /**
      * Create a new AuthController instance.
-     * Set middleware for logout & account functions
+     * Set middleware for all functions
      *
      * @return void
      */
@@ -26,6 +26,38 @@ class AuthenticationController extends Controller
         $this->middleware(ValidateRegister::class)->only("register");
         $this->middleware(ValidateLogin::class)->only("login");
         $this->middleware(ValidateReset::class)->only("resetPassword");
+    }
+
+    /**
+     * Login user and create token
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function login(Request $request): JsonResponse
+    {
+        $emailCred = $request->only("email", "password");
+        $userCred = $request->only("username", "password");
+
+        if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($emailCred)) {
+            return response()->json([
+                "type" => "Successful request",
+                "message" => "User logged in successfully",
+                "token" => $token,
+            ], 200);
+        } else if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($userCred)) {
+            return response()->json([
+                "type" => "Successful request",
+                "message" => "User logged in successfully",
+                "token" => $token,
+            ], 200);
+        } else {
+            return response()->json([
+                "type" => "Unauthorized",
+                "message" => "Invalid credentials"
+            ], 401);
+        }
     }
 
     /**
@@ -51,46 +83,6 @@ class AuthenticationController extends Controller
             "token" => $token,
             "account" => $user
         ], 201);
-    }
-
-    /**
-     * Login user and create token
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function login(Request $request): JsonResponse
-    {
-        $emailCred = $request->only("email", "password");
-        $userCred = $request->only("username", "password");
-
-        if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($emailCred)) {
-
-            $user = Auth()->user();
-
-            return response()->json([
-                "type" => "Successful request",
-                "message" => "User logged in successfully by email",
-                "token" => $token,
-                "account" => $user,
-            ], 200);
-        } else if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($userCred)) {
-
-            $user = Auth()->user();
-
-            return response()->json([
-                "type" => "Successful request",
-                "message" => "User logged in successfully by username",
-                "token" => $token,
-                "account" => $user,
-            ], 200);
-        } else {
-            return response()->json([
-                "type" => "Unauthorized",
-                "message" => "Invalid credentials"
-            ], 401);
-        }
     }
 
     /**

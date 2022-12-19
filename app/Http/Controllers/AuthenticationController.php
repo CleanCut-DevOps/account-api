@@ -73,15 +73,14 @@ class AuthenticationController extends Controller
 
         $request['password'] = Hash::make($request->password);
 
-        $user = User::create($request->all());
+        User::create($request->all());
 
         $token = Auth()->attempt($credentials);
 
         return response()->json([
             "type" => "Successful request",
             "message" => "User created successfully",
-            "token" => $token,
-            "account" => $user
+            "token" => $token
         ], 201);
     }
 

@@ -22,8 +22,8 @@ class ValidateUpdate
         try {
             $request->validate([
                 'avatar' => ['nullable', 'string'],
-                'username' => ['nullable', 'string', 'max:255', 'unique:users'],
-                'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
+                'username' => ['nullable', 'string', 'max:255', 'unique:user'],
+                'email' => ['nullable', 'string', 'email', 'max:255', 'unique:user'],
                 'contact' => ['nullable', 'string'],
             ]);
 

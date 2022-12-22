@@ -10,7 +10,7 @@ as implementing mechanisms for verifying users' identities, such as by using pas
 
 To get started, you'll need to have the following software installed on your local machine:
 
-- MySQL
+- MySQL (locally or DBaaS)
 - PHP 8
 - Composer
 
@@ -34,9 +34,9 @@ composer install
 
 Next, copy the `.env.example` file to `.env`.
 
-1. Update the database credentials to match your local MySQL database
-2. Update the URLs of all other services listed in the `.env` file to match the URLs of the services running on your
-   local machine.
+1. Update the database credentials to connect to your MySQL database
+2. Set the URLs of all other services listed in the `.env` file to the URLs where the other services can be accessed
+   from.
 3. Generate a new laravel key.
 
 ```bash

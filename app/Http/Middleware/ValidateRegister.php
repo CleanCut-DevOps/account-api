@@ -22,8 +22,8 @@ class ValidateRegister
     {
         try {
             $request->validate([
-                'username' => ['required', 'string', 'max:255', 'unique:users'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'username' => ['required', 'string', 'max:255', 'unique:user'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:user'],
                 'contact' => ['required', 'string', 'max:255'],
                 'password' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
                 'avatar' => ['nullable', 'string'],

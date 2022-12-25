@@ -6,26 +6,28 @@ Responsible for storing and managing user information, as well as verifying the 
 are authorized to access the website and its features. This could involve creating and managing user accounts, as well
 as implementing mechanisms for verifying users' identities, such as by using passwords or other forms of authentication.
 
+> Access the API on https://account-api.klenze.com.au
+
 ## Getting Started
 
 To get started, you'll need to have the following software installed on your local machine:
 
-- MySQL (locally or DBaaS)
-- PHP 8
-- Composer
+-   MySQL (locally or DBaaS)
+-   PHP 8
+-   Composer
 
-Once you have MySQL, create a schema in the MySQL DB called `user_accounts`.
+Once you have MySQL, create a schema in the MySQL DB called `account`.
 
 Once you have PHP 8 and Composer installed, clone this repository to your local machine.
 
 ```bash
-git clone "https://github.com/CleanCut-DevOps/user-accounts-service.git"
-``` 
+git clone "https://github.com/CleanCut-DevOps/account-api.git"
+```
 
 Next, navigate to the root directory of the project and install the dependencies:
 
 ```bash
-cd user-accounts-service
+cd account-api
 
 composer update
 

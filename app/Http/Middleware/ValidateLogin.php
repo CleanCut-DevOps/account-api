@@ -22,20 +22,20 @@ class ValidateLogin
     {
         try {
             $request->validate([
-                'stay' => ['required', 'boolean'],
-                'email' => [Rule::requiredIf(!$request->username), 'email', 'max:255'],
-                'username' => [Rule::requiredIf(!$request->email)],
-                'password' => ['required', 'string', 'min:8'],
+                "stay" => ["required", "boolean"],
+                "email" => [Rule::requiredIf(!$request->username), "email", "max:255"],
+                "username" => [Rule::requiredIf(!$request->email), "string", "max:255"],
+                "password" => ["required", "string", "min:8"],
             ]);
 
             return $next($request);
         } catch (ValidationException $e) {
-            $errors = array_merge(...array_values($e->errors()));
+            $errors = collect($e->errors());
 
             return response()->json([
                 "type" => "Invalid data",
                 "message" => $e->getMessage(),
-                "errors" => $errors,
+                "errors" => $errors->map(fn ($error) => $error[0]),
             ], 400);
         }
     }

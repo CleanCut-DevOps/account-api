@@ -28,12 +28,12 @@ class ValidateReset
 
             return $next($request);
         } catch (ValidationException $e) {
-            $errors = array_merge(...array_values($e->errors()));
+            $errors = collect($e->errors());
 
             return response()->json([
                 "type" => "Invalid data",
                 "message" => $e->getMessage(),
-                "errors" => $errors,
+                "errors" => $errors->map(fn ($error) => $error[0]),
             ], 400);
         }
     }

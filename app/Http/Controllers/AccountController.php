@@ -46,22 +46,62 @@ class AccountController extends Controller
      */
     public function update(Request $request): JSONResponse
     {
+        $errors = [];
         $authUser = Auth()->user();
 
         $user = User::find($authUser->id);
 
-        if (!empty($request->username)) $user->username = $request->username;
         if (!empty($request->contact)) $user->contact = $request->contact;
-        if (!empty($request->avatar)) $user->avatar = $request->avatar;
-        if (!empty($request->email)) $user->email = $request->email;
+        if (empty($request->avatar)) $user->avatar = null; else $user->avatar = $request->avatar;
 
-        $user->save();
+        if (!empty($request->email)) {
+            $attempt = User::whereEmail($request->email)->get();
 
-        return response()->json([
-            "type" => "Successful request",
-            "message" => "Account details updated successfully",
-            "account" => $user
-        ]);
+            if (count($attempt) == 0 || $attempt[0]->id == $user->id) {
+                $user->email = $request->email;
+
+            } else $errors["email"] = "Email already exists.";
+        }
+
+        if (!empty($request->username)) {
+            $attempt = User::whereUsername($request->username)->get();
+
+            if (count($attempt) == 0 || $attempt[0]->id == $user->id) {
+                $user->username = $request->username;
+
+            } else $errors["username"] = "Username already exists.";
+        }
+
+        $count = count($errors);
+
+        if ($count == 0) {
+            $user->save();
+
+            return response()->json([
+                "type" => "Successful request",
+                "message" => "Account details updated successfully.",
+                "account" => $user
+            ]);
+
+        } else if ($count == 1) {
+            return response()->json([
+                "type" => "Invalid data",
+                "message" => array_values($errors)[0],
+                "errors" => $errors,
+            ], 400);
+        } else if ($count == 2) {
+            return response()->json([
+                "type" => "Invalid data",
+                "message" => array_values($errors)[0] . " (and 1 more error.)",
+                "errors" => $errors,
+            ], 400);
+        } else {
+            return response()->json([
+                "type" => "Invalid data",
+                "message" => array_values($errors)[0] . " (and " . count($errors) - 1 . " more errors.)",
+                "errors" => $errors,
+            ], 400);
+        }
     }
 
     /**
@@ -76,6 +116,7 @@ class AccountController extends Controller
         $user = User::find($authUser->id);
 
         Auth()->logout();
+
         $user->delete();
 
         return response()->json([

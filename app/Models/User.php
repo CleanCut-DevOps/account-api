@@ -21,9 +21,10 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property string $id
  * @property string $username
  * @property string $email
- * @property string $contact
  * @property string $password
+ * @property string $contact
  * @property string|null $avatar
+ * @property string $type
  * @property int|null $deleted_at
  * @property int|null $created_at
  * @property int|null $updated_at
@@ -41,6 +42,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereEmail($value)
  * @method static EloquentBuilder|User whereId($value)
  * @method static EloquentBuilder|User wherePassword($value)
+ * @method static EloquentBuilder|User whereType($value)
  * @method static EloquentBuilder|User whereUpdatedAt($value)
  * @method static EloquentBuilder|User whereUsername($value)
  * @method static QueryBuilder|User withTrashed()

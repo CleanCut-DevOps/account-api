@@ -26,17 +26,16 @@ class ValidateRegister
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:user'],
                 'contact' => ['required', 'string', 'max:255'],
                 'password' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
-                'avatar' => ['nullable', 'string'],
             ]);
 
             return $next($request);
         } catch (ValidationException $e) {
-            $errors = array_merge(...array_values($e->errors()));
+            $errors = collect($e->errors());
 
             return response()->json([
                 "type" => "Invalid data",
                 "message" => $e->getMessage(),
-                "errors" => $errors,
+                "errors" => $errors->map(fn ($error) => $error[0]),
             ], 400);
         }
     }

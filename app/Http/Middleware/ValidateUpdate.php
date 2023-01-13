@@ -22,20 +22,20 @@ class ValidateUpdate
         try {
             $request->validate([
                 'avatar' => ['nullable', 'string'],
-                'username' => ['nullable', 'string', 'max:255', 'unique:user'],
-                'email' => ['nullable', 'string', 'email', 'max:255', 'unique:user'],
-                'contact' => ['nullable', 'string'],
+                'username' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'contact' => ['required', 'string',  'max:255']
             ]);
 
             return $next($request);
         } catch (ValidationException $e) {
-            $errors = array_merge(...array_values($e->errors()));
+            $errors = collect($e->errors());
 
             return response()->json([
                 "type" => "Invalid data",
                 "message" => $e->getMessage(),
-                "errors" => $errors,
-            ], 422);
+                "errors" => $errors->map(fn ($error) => $error[0]),
+            ], 400);
         }
     }
 }

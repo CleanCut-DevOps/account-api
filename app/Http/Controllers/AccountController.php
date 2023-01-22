@@ -7,6 +7,7 @@ use App\Http\Middleware\ValidateUpdate;
 use App\Models\user;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
@@ -29,7 +30,9 @@ class AccountController extends Controller
      */
     public function read(): JsonResponse
     {
-        $user = Auth()->user();
+        $userID = Auth::payload()->get("sub");
+
+        $user = User::find($userID);
 
         return response()->json([
             "type" => "Successful request",
@@ -47,29 +50,21 @@ class AccountController extends Controller
     public function update(Request $request): JSONResponse
     {
         $errors = [];
-        $authUser = Auth()->user();
+        $userID = Auth::payload()->get("sub");
 
-        $user = User::find($authUser->id);
+        $user = User::find($userID);
 
-        if (!empty($request->contact)) $user->contact = $request->contact;
-        if (empty($request->avatar)) $user->avatar = null; else $user->avatar = $request->avatar;
+        if ($user->full_name != request("full_name")) $user->full_name = request("full_name");
+        if ($user->phone_number != request("phone_number")) $user->phone_number = request("phone_number");
+        if (empty(request("avatar"))) $user->avatar = null; else $user->avatar = request("avatar");
 
-        if (!empty($request->email)) {
-            $attempt = User::whereEmail($request->email)->get();
+        if (!empty(request("email"))) {
+            $attempt = User::whereEmail(request("email"))->get();
 
             if (count($attempt) == 0 || $attempt[0]->id == $user->id) {
-                $user->email = $request->email;
+                $user->email = request("email");
 
             } else $errors["email"] = "Email already exists.";
-        }
-
-        if (!empty($request->username)) {
-            $attempt = User::whereUsername($request->username)->get();
-
-            if (count($attempt) == 0 || $attempt[0]->id == $user->id) {
-                $user->username = $request->username;
-
-            } else $errors["username"] = "Username already exists.";
         }
 
         $count = count($errors);

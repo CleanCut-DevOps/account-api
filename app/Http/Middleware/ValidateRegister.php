@@ -22,9 +22,9 @@ class ValidateRegister
     {
         try {
             $request->validate([
-                'username' => ['required', 'string', 'max:255', 'unique:user'],
+                'full_name' => ['required', 'string', 'max:255', 'unique:user'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:user'],
-                'contact' => ['required', 'string', 'max:255'],
+                'phone_number' => ['required', 'string', 'max:255'],
                 'password' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
             ]);
 

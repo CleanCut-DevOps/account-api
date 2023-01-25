@@ -40,7 +40,7 @@ class AuthenticationController extends Controller
     {
         $emailCred = $request->only("email", "password");
 
-        if ($token = Auth::setTTL(request("stay") ? 10800 : 3600)->attempt($emailCred)) {
+        if ($token = Auth::setTTL(request("stay") ? 60 * 24 * 7 : 60 * 24)->attempt($emailCred)) {
             return response()->json([
                 "type" => "Successful request",
                 "message" => "User logged in successfully",
@@ -67,7 +67,7 @@ class AuthenticationController extends Controller
 
         $user = User::create($request->all());
 
-        $token = Auth::login($user);
+        $token = Auth::setTTL(60 * 24)->login($user);
 
         return response()->json([
             "type" => "Successful request",

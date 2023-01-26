@@ -15,10 +15,10 @@ class CreateUsersTable extends Migration
     {
         Schema::create('user', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('username')->unique();
-            $table->string('email')->unique();
             $table->string('password');
-            $table->string('contact');
+            $table->string('full_name');
+            $table->string('phone_number');
+            $table->string('email')->unique();
             $table->text('avatar')->nullable();
             $table->enum('type', ['admin', 'cleaner', 'user'])->default('user');
             $table->softDeletes();

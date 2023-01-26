@@ -9,6 +9,7 @@ use App\Http\Middleware\ValidateReset;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthenticationController extends Controller
@@ -23,8 +24,8 @@ class AuthenticationController extends Controller
     public function __construct()
     {
         $this->middleware(ValidateJWT::class, ["except" => ["login", "register"]]);
-        $this->middleware(ValidateRegister::class)->only("register");
         $this->middleware(ValidateLogin::class)->only("login");
+        $this->middleware(ValidateRegister::class)->only("register");
         $this->middleware(ValidateReset::class)->only("resetPassword");
     }
 
@@ -38,20 +39,13 @@ class AuthenticationController extends Controller
     public function login(Request $request): JsonResponse
     {
         $emailCred = $request->only("email", "password");
-        $userCred = $request->only("username", "password");
 
-        if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($emailCred)) {
+        if ($token = Auth::setTTL(request("stay") ? 60 * 24 * 7 : 60 * 24)->attempt($emailCred)) {
             return response()->json([
                 "type" => "Successful request",
                 "message" => "User logged in successfully",
                 "token" => $token,
-            ], 200);
-        } else if ($token = Auth()->setTTL($request->stay ? 10800 : 3600)->attempt($userCred)) {
-            return response()->json([
-                "type" => "Successful request",
-                "message" => "User logged in successfully",
-                "token" => $token,
-            ], 200);
+            ]);
         } else {
             return response()->json([
                 "type" => "Unauthorized",
@@ -69,13 +63,11 @@ class AuthenticationController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
-        $credentials = request(["email", "password"]);
+        $request["password"] = Hash::make(request("password"));
 
-        $request['password'] = Hash::make($request->password);
+        $user = User::create($request->all());
 
-        User::create($request->all());
-
-        $token = Auth()->attempt($credentials);
+        $token = Auth::setTTL(60 * 24)->login($user);
 
         return response()->json([
             "type" => "Successful request",
@@ -91,7 +83,7 @@ class AuthenticationController extends Controller
      */
     public function logout(): JsonResponse
     {
-        Auth()->logout();
+        Auth::logout();
 
         return response()->json([
             "type" => "Successful request",
@@ -100,7 +92,7 @@ class AuthenticationController extends Controller
     }
 
     /**
-     * Reset the user"s password.
+     * Reset the user's password.
      *
      * @param Request $request
      *
@@ -108,12 +100,12 @@ class AuthenticationController extends Controller
      */
     public function resetPassword(Request $request): JsonResponse
     {
-        $authUser = Auth()->user();
+        $userID = Auth::payload()->get("sub");
 
-        $user = User::find($authUser->id);
+        $user = User::find($userID);
 
-        if (Hash::check($request->oldPassword, $user->password)) {
-            $user->password = Hash::make($request->newPassword);
+        if (Hash::check(request("oldPassword"), $user->password)) {
+            $user->password = Hash::make(request("newPassword"));
             $user->save();
 
             return response()->json([

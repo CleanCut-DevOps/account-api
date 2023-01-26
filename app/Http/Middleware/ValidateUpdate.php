@@ -22,9 +22,9 @@ class ValidateUpdate
         try {
             $request->validate([
                 'avatar' => ['nullable', 'string'],
-                'username' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255'],
-                'contact' => ['required', 'string',  'max:255']
+                'full_name' => ['string', 'max:255'],
+                'email' => ['string', 'email', 'max:255'],
+                'phone_number' => ['string',  'max:255']
             ]);
 
             return $next($request);

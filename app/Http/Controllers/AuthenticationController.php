@@ -92,7 +92,7 @@ class AuthenticationController extends Controller
     }
 
     /**
-     * Reset the user"s password.
+     * Reset the user's password.
      *
      * @param Request $request
      *

@@ -52,18 +52,17 @@ class AccountController extends Controller
         $errors = [];
         $userID = Auth::payload()->get("sub");
 
-        $user = User::find($userID);
+        $user = User::whereId($userID)->first();
 
-        if ($user->full_name != request("full_name")) $user->full_name = request("full_name");
-        if ($user->phone_number != request("phone_number")) $user->phone_number = request("phone_number");
+        if (!empty(request("full_name")) && $user->full_name != request("full_name")) $user->full_name = request("full_name");
+        if (!empty(request("phone_number")) && $user->phone_number != request("phone_number")) $user->phone_number = request("phone_number");
         if (empty(request("avatar"))) $user->avatar = null; else $user->avatar = request("avatar");
 
-        if (!empty(request("email"))) {
+        if (!empty(request("email")) && $user->email != request("email")) {
             $attempt = User::whereEmail(request("email"))->get();
 
-            if (count($attempt) == 0 || $attempt[0]->id == $user->id) {
+            if (count($attempt) == 0) {
                 $user->email = request("email");
-
             } else $errors["email"] = "Email already exists.";
         }
 
@@ -75,7 +74,7 @@ class AccountController extends Controller
             return response()->json([
                 "type" => "Successful request",
                 "message" => "Account details updated successfully.",
-                "account" => $user
+                "account" => $user->refresh()
             ]);
 
         } else if ($count == 1) {

@@ -22,8 +22,8 @@ class ValidateReset
     {
         try {
             $request->validate([
-                'newPassword' => ['required', Password::min(8)->mixedCase()->numbers()->uncompromised()],
-                'oldPassword' => ['required', Password::default()],
+                "newPassword" => ["required", "string", Password::min(8)->mixedCase()->numbers()->uncompromised()],
+                "oldPassword" => ["required", "string", Password::default()],
             ]);
 
             return $next($request);

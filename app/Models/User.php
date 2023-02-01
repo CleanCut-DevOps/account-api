@@ -15,13 +15,14 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
+
 /**
  * App\Models\User
  *
  * @property string $id
+ * @property string $name
  * @property string $phone
  * @property string $password
- * @property string $full_name
  * @property string $email
  * @property string $preferred_contact
  * @property Carbon|null $email_verified_at
@@ -38,8 +39,8 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereDeletedAt($value)
  * @method static EloquentBuilder|User whereEmail($value)
  * @method static EloquentBuilder|User whereEmailVerifiedAt($value)
- * @method static EloquentBuilder|User whereFullName($value)
  * @method static EloquentBuilder|User whereId($value)
+ * @method static EloquentBuilder|User whereName($value)
  * @method static EloquentBuilder|User wherePassword($value)
  * @method static EloquentBuilder|User wherePhone($value)
  * @method static EloquentBuilder|User wherePreferredContact($value)
@@ -65,10 +66,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
+        'name',
         'email',
         'phone',
         'password',
-        'full_name',
         'preferred_contact'
     ];
 

@@ -90,6 +90,7 @@ jobs:
             echo BOOKING_API="${{ secrets.BOOKING_API }}" >> .env
             echo SESSION_API="${{ secrets.SESSION_API }}" >> .env
             echo REVIEW_API="${{ secrets.REVIEW_API }}" >> .env
+            php artisan key:generate
             php artisan config:cache
             sudo certbot renew
             sudo service nginx restart

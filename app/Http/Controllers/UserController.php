@@ -182,7 +182,7 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Retrieve data of the specified user.
      *
      * @return JsonResponse
      */
@@ -191,12 +191,12 @@ class UserController extends Controller
         return response()->json([
             'type' => 'Successful request',
             'message' => 'User data retrieved successfully',
-            'user' => Auth::user()
+            'user' => User::find(Auth::user()->getAuthIdentifier())
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update data of the specified user.
      *
      * @param Request $request
      * @return JsonResponse
@@ -212,7 +212,7 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete data of the specified user.
      *
      * @return JsonResponse
      */

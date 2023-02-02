@@ -31,6 +31,8 @@ class UserTest extends TestCase
         return $this->withHeaders(['Authorization' => "Bearer {$token}"]);
     }
 
+    // Register
+
     /**
      * Feature test for successful user registration
      *
@@ -75,6 +77,8 @@ class UserTest extends TestCase
             'errors'
         ]);
     }
+
+    // Login
 
     /**
      * Feature test for successful user login
@@ -146,6 +150,8 @@ class UserTest extends TestCase
         ]);
     }
 
+    // Logout
+
     /**
      * Feature test for successful user logout
      *
@@ -177,6 +183,8 @@ class UserTest extends TestCase
             'message'
         ]);
     }
+
+    // Reset password
 
     /**
      * Feature test for successful user password reset
@@ -233,6 +241,8 @@ class UserTest extends TestCase
         ]);
     }
 
+    // Get user data
+
     /**
      * Feature test for successful user data retrieval
      *
@@ -271,6 +281,8 @@ class UserTest extends TestCase
             'message'
         ]);
     }
+
+    // Update user data
 
     /**
      * Feature test for successful user update
@@ -328,6 +340,8 @@ class UserTest extends TestCase
             'message'
         ]);
     }
+
+    // Delete user data
 
     /**
      * Feature test for successful user delete

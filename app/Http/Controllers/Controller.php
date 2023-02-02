@@ -22,10 +22,10 @@ class Controller extends BaseController
             if ($validator->fails()) {
                 $errors = collect($validator->errors());
 
-                return response([
+                return response()->json([
                     "type" => "Invalid data",
-                    "message" => $validator->errors(),
-                    "fields" => $errors->map(fn($error) => $error[0])
+                    "message" => $validator->errors()->first(),
+                    "errors" => $errors->map(fn($error) => $error[0])
                 ], 400);
             } else {
                 return $next($request);

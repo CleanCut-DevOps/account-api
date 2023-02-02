@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Traits\UUID;
+use Database\Factories\UserFactory;
 use Eloquent;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -31,6 +33,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @property Carbon|null $updated_at
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
  * @property-read int|null $notifications_count
+ * @method static UserFactory factory(...$parameters)
  * @method static EloquentBuilder|User newModelQuery()
  * @method static EloquentBuilder|User newQuery()
  * @method static QueryBuilder|User onlyTrashed()
@@ -51,7 +54,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  */
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
-    use UUID, SoftDeletes, Notifiable;
+    use UUID, SoftDeletes, Notifiable, HasFactory;
 
     public $timestamps = true;
     public $incrementing = false;

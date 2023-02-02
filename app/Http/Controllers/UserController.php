@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\ValidateEmailVerification;
 use App\Http\Middleware\ValidateJWT;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -9,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
@@ -24,6 +26,7 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware(ValidateJWT::class)->except(['login', 'register']);
+        $this->middleware(ValidateEmailVerification::class)->except(['login', 'register']);
 
         $this->validate('login', [
             'email' => ['required', 'email', 'max:255'],
@@ -43,7 +46,7 @@ class UserController extends Controller
         $this->validate('register', [
             "name" => ["required", "string", "max:255"],
             "phone" => ["required", "string", "max:255"],
-            "email" => ["required", "string", "email", "max:255", "unique:user"],
+            "email" => ["required", "string", "email", "max:255", "unique:users"],
             "password" => ["required", Password::min(8)->mixedCase()->numbers()->uncompromised()],
         ], [
             "name.required" => "We need to who you are",
@@ -68,6 +71,19 @@ class UserController extends Controller
             "newPassword.string" => "Your new password is invalid",
             "oldPassword.required" => "Please indicate your old password",
             "oldPassword.string" => "Your old password is invalid",
+        ]);
+
+        $this->validate('update', [
+            'name' => ['string', 'max:255'],
+            'phone' => ['string', 'max:255'],
+            'preferred_contact' => ['string', Rule::in(['email', 'phone'])],
+        ], [
+            'name.string' => 'Your name is invalid',
+            'name.max' => 'Your name is too long',
+            'phone.string' => 'Your phone number is invalid',
+            'phone.max' => 'Your phone number is too long',
+            'preferred_contact.string' => 'Your preferred contact is invalid',
+            'preferred_contact.in' => 'Your preferred contact is invalid',
         ]);
     }
 
@@ -116,9 +132,12 @@ class UserController extends Controller
 
         event(new Registered($user));
 
+        $token = Auth::login($user);
+
         return response()->json([
             'type' => 'Successful request',
-            'message' => 'User created successfully'
+            'message' => 'User created successfully',
+            'token' => $token
         ], 201);
     }
 
@@ -144,9 +163,7 @@ class UserController extends Controller
      */
     public function reset(): JsonResponse
     {
-        $userID = Auth::payload()->get('sub');
-
-        $user = User::find($userID);
+        $user = User::find(Auth::user()->getAuthIdentifier());
 
         if (Hash::check(request('oldPassword'), $user->password)) {
             $user->password = Hash::make(request('newPassword'));
@@ -167,15 +184,14 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param User $user
      * @return JsonResponse
      */
-    public function show(User $user): JsonResponse
+    public function show(): JsonResponse
     {
         return response()->json([
             'type' => 'Successful request',
             'message' => 'User data retrieved successfully',
-            'user' => $user
+            'user' => Auth::user()
         ]);
     }
 
@@ -183,31 +199,28 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param User $user
      * @return JsonResponse
      */
-    public function update(Request $request, User $user): JsonResponse
+    public function update(Request $request): JsonResponse
     {
-        $user->update($request->only(['email', 'phone', 'full_name', 'preferred_contact']));
+        User::whereId(Auth::user()->getAuthIdentifier())->update($request->only(['name', 'phone', 'preferred_contact']));
 
         return response()->json([
             'type' => 'Successful request',
-            'message' => 'User data updated successfully',
-            'user' => $user
+            'message' => 'User data updated successfully'
         ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param User $user
      * @return JsonResponse
      */
-    public function destroy(User $user): JsonResponse
+    public function destroy(): JsonResponse
     {
-        Auth::logout();
+        User::whereId(Auth::user()->getAuthIdentifier())->delete();
 
-        $user->delete();
+        Auth::logout();
 
         return response()->json([
             'type' => 'Successful request',

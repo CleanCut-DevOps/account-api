@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\VerifyEmailToken;
 use Illuminate\Auth\Events\Verified;
@@ -30,7 +31,12 @@ Route::prefix('user')->group(function () {
 
 });
 
-// Default routes
+// Admin account routes
+Route::prefix('admin')->group(function () {
+
+    Route::get('users', [AdminController::class, 'index']);
+
+});
 
 // Email verification route
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {

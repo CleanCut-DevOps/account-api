@@ -52,9 +52,9 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 })->middleware([VerifyEmailToken::class, 'signed'])->name('verification.verify');
 
 // Catch-all route
-Route::get('{any}', function () {
+Route::fallback(function () {
     return response()->json([
         "type" => "Not found",
         "message" => "There's nothing here.."
     ], 404);
-})->where('any', '.*');
+});

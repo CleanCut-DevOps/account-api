@@ -2,15 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Admin;
 use Closure;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
 
-class ValidateJWT
+class IsAdmin
 {
     /**
      * Handle an incoming request.
@@ -21,15 +21,13 @@ class ValidateJWT
      */
     public function handle(Request $request, Closure $next): JsonResponse|RedirectResponse|Response
     {
-        try {
-            JWTAuth::parseToken()->authenticate();
-
+        if (Admin::whereId(Auth::id())->exists()) {
             return $next($request);
-        } catch (Exception $e) {
+        } else {
             return response()->json([
-                "type" => "Unauthenticated",
-                "message" => "Invalid credentials"
-            ], 401);
+                "type" => "Unauthorized",
+                "message" => "You are not authorized to access this resource"
+            ], 403);
         }
     }
 }

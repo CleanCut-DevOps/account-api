@@ -3,51 +3,63 @@
 namespace App\Models;
 
 use App\Traits\UUID;
+use Database\Factories\UserFactory;
 use Eloquent;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+
 
 /**
  * App\Models\User
  *
  * @property string $id
+ * @property string $name
+ * @property string $phone
  * @property string $password
- * @property string $full_name
- * @property string $phone_number
  * @property string $email
- * @property string|null $avatar
- * @property string $type
- * @property int|null $deleted_at
- * @property int|null $created_at
- * @property int|null $updated_at
+ * @property string $preferred_contact
+ * @property Carbon|null $email_verified_at
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
+ * @property-read int|null $notifications_count
+ * @method static UserFactory factory(...$parameters)
  * @method static EloquentBuilder|User newModelQuery()
  * @method static EloquentBuilder|User newQuery()
  * @method static QueryBuilder|User onlyTrashed()
  * @method static EloquentBuilder|User query()
- * @method static EloquentBuilder|User whereAvatar($value)
  * @method static EloquentBuilder|User whereCreatedAt($value)
  * @method static EloquentBuilder|User whereDeletedAt($value)
  * @method static EloquentBuilder|User whereEmail($value)
- * @method static EloquentBuilder|User whereFullName($value)
+ * @method static EloquentBuilder|User whereEmailVerifiedAt($value)
  * @method static EloquentBuilder|User whereId($value)
+ * @method static EloquentBuilder|User whereName($value)
  * @method static EloquentBuilder|User wherePassword($value)
- * @method static EloquentBuilder|User wherePhoneNumber($value)
- * @method static EloquentBuilder|User whereType($value)
+ * @method static EloquentBuilder|User wherePhone($value)
+ * @method static EloquentBuilder|User wherePreferredContact($value)
  * @method static EloquentBuilder|User whereUpdatedAt($value)
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin Eloquent
  */
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
-    use SoftDeletes, UUID;
+    use UUID, SoftDeletes, Notifiable, HasFactory;
 
     public $timestamps = true;
     public $incrementing = false;
-    protected $table = 'user';
+
+    protected $table = 'users';
     protected $primaryKey = 'id';
     protected $keyType = 'string';
 
@@ -57,12 +69,11 @@ class User extends Authenticatable implements JWTSubject
      * @var array<int, string>
      */
     protected $fillable = [
-        'type',
+        'name',
         'email',
-        'avatar',
+        'phone',
         'password',
-        'full_name',
-        'phone_number',
+        'preferred_contact'
     ];
 
     /**
@@ -73,6 +84,7 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'deleted_at',
+        'email_verified_at',
     ];
 
     /**
@@ -81,9 +93,10 @@ class User extends Authenticatable implements JWTSubject
      * @var array<string, string>
      */
     protected $casts = [
-        'deleted_at' => 'timestamp',
-        'created_at' => 'timestamp',
-        'updated_at' => 'timestamp',
+        'created_at' => 'datetime',
+        'deleted_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'email_verified_at' => 'datetime'
     ];
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\IsAdmin;
 use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -9,6 +10,11 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(IsAdmin::class);
+    }
+
     /**
      * Display a listing of users.
      *

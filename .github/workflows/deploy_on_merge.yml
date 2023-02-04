@@ -80,6 +80,7 @@ jobs:
             echo JWT_SECRET="${{ secrets.JWT_SECRET }}" >> .env
             php artisan key:generate
             php artisan config:cache
+            php artisan route:clear
             sudo certbot renew
             sudo service nginx restart
             sudo systemctl reload nginx

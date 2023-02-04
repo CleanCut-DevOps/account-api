@@ -16,10 +16,10 @@ class ValidateJWT
      * Handle an incoming request.
      *
      * @param Request $request
-     * @param Closure(Request): (Response|RedirectResponse) $next
-     * @return JsonResponse|RedirectResponse
+     * @param Closure(Request): (Response|RedirectResponse|Response) $next
+     * @return JsonResponse|RedirectResponse|Response
      */
-    public function handle(Request $request, Closure $next): JsonResponse|RedirectResponse
+    public function handle(Request $request, Closure $next): JsonResponse|RedirectResponse|Response
     {
         try {
             JWTAuth::parseToken()->authenticate();

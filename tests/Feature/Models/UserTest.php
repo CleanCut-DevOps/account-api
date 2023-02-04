@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Models;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -19,10 +18,6 @@ class UserTest extends TestCase
      */
     public function withAuth(): self
     {
-        User::factory()->create([
-            'email' => 'test@domain.com'
-        ]);
-
         $token = Auth::attempt([
             'email' => 'test@domain.com',
             'password' => 'Passw0rd'
@@ -42,7 +37,7 @@ class UserTest extends TestCase
     {
         $response = $this->post('/user/register', [
             'name' => 'A valid name',
-            'email' => 'test@domain.com',
+            'email' => 'test2@domain.com',
             'password' => 'Passw0rd@2023',
             'phone' => '87654321'
         ]);
@@ -61,10 +56,6 @@ class UserTest extends TestCase
      */
     public function test_register_with_missing_and_invalid_values(): void
     {
-        User::factory()->create([
-            'email' => 'test@domain.com'
-        ]);
-
         $response = $this->post('/user/register', [
             'name' => 213,
             'email' => 'test@domain.com',
@@ -87,16 +78,11 @@ class UserTest extends TestCase
      */
     public function test_login_with_valid_credentials(): void
     {
-        User::factory()->create([
-            'email' => 'test@domain.com'
-        ]);
-
         $res = $this->post('/user/login', [
             'email' => 'test@domain.com',
             'password' => 'Passw0rd',
             'remember' => true
         ]);
-
 
         $res->assertStatus(Response::HTTP_OK)->assertJsonStructure([
             'type',
@@ -111,10 +97,6 @@ class UserTest extends TestCase
      */
     public function test_login_with_missing_and_invalid_values(): void
     {
-        User::factory()->create([
-            'email' => 'test@domain.com'
-        ]);
-
         $response = $this->post('/user/login', [
             'email' => 123,
             'password' => 'Passw0rd'
@@ -134,10 +116,6 @@ class UserTest extends TestCase
      */
     public function test_login_with_invalid_credentials(): void
     {
-        User::factory()->create([
-            'email' => 'test@domain.com'
-        ]);
-
         $response = $this->post('/user/login', [
             'email' => 'test@domain.com',
             'password' => 'password',

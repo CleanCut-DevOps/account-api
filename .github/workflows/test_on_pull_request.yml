@@ -1,5 +1,5 @@
 name: Test Account API on pull request
-run-name: ${{ github.actor }} is testing the application
+run-name: ${{ github.actor }} is testing the application ✅
 
 on:
   pull_request:

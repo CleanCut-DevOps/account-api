@@ -1,5 +1,5 @@
 name: Deploy Account API to Digitalocean
-run-name: ${{ github.actor }} is deploying the application
+run-name: ${{ github.actor }} is deploying the application 🚀
 
 on:
   push:

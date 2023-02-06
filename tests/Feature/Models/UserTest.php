@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Models;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
@@ -42,7 +42,7 @@ class UserTest extends TestCase
             'phone' => '87654321'
         ]);
 
-        $response->assertStatus(Response::HTTP_CREATED)->assertJsonStructure([
+        $response->assertCreated()->assertJsonStructure([
             'type',
             'message',
             'token'
@@ -62,10 +62,68 @@ class UserTest extends TestCase
             'password' => 'Passw0rd'
         ]);
 
-        $response->assertStatus(Response::HTTP_BAD_REQUEST)->assertJsonStructure([
+        $response->assertBadRequest()->assertJsonStructure([
             'type',
             'message',
             'errors'
+        ]);
+    }
+
+    /**
+     * Feature test for unsuccessful user registration with existing email
+     *
+     * @return void
+     */
+    public function test_register_with_existing_email(): void
+    {
+        $response = $this->post('/user/register', [
+            'name' => 'A valid name',
+            'email' => 'test@domain.com',
+            'password' => 'Passw0rd@2023',
+            'phone' => '87654321'
+        ]);
+
+        $response->assertBadRequest()->assertJsonStructure([
+            'type',
+            'message'
+        ]);
+    }
+
+    // Email Verification
+
+    /**
+     * Feature test for successful resend email verification
+     *
+     * @return void
+     */
+    public function test_resend_email_verification_with_valid_token(): void
+    {
+        $user = User::factory()->unverified()->create([
+            'email' => 'test2@domain.com'
+        ]);
+
+        $token = Auth::login($user);
+
+        $response = $this->withHeaders(['Authorization' => "Bearer $token"])->post('/email/re-verify');
+
+        $response->assertOk()->assertJsonStructure([
+            'type',
+            'message'
+        ]);
+    }
+
+    /**
+     * Feature test for unsuccessful resend email verification
+     *
+     * @return void
+     */
+    public function test_resend_email_verification_with_invalid_credentials(): void
+    {
+        $response = $this->withAuth()->post('/email/re-verify');
+
+        $response->assertBadRequest()->assertJsonStructure([
+            'type',
+            'message'
         ]);
     }
 
@@ -76,7 +134,7 @@ class UserTest extends TestCase
      *
      * @return void
      */
-    public function test_login_with_valid_credentials(): void
+    public function test_login_with_credentials(): void
     {
         $res = $this->post('/user/login', [
             'email' => 'test@domain.com',
@@ -84,7 +142,7 @@ class UserTest extends TestCase
             'remember' => true
         ]);
 
-        $res->assertStatus(Response::HTTP_OK)->assertJsonStructure([
+        $res->assertOk()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -102,7 +160,7 @@ class UserTest extends TestCase
             'password' => 'Passw0rd'
         ]);
 
-        $response->assertStatus(Response::HTTP_BAD_REQUEST)->assertJsonStructure([
+        $response->assertBadRequest()->assertJsonStructure([
             'type',
             'message',
             'errors'
@@ -122,7 +180,7 @@ class UserTest extends TestCase
             'remember' => true
         ]);
 
-        $response->assertStatus(Response::HTTP_UNAUTHORIZED)->assertJsonStructure([
+        $response->assertUnauthorized()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -135,11 +193,11 @@ class UserTest extends TestCase
      *
      * @return void
      */
-    public function test_logout_with_valid_credentials(): void
+    public function test_logout_with_credentials(): void
     {
         $response = $this->withAuth()->post('/user/logout');
 
-        $response->assertStatus(Response::HTTP_OK)->assertJsonStructure([
+        $response->assertOk()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -156,7 +214,7 @@ class UserTest extends TestCase
             ->withHeaders(['Authorization' => "Bearer invalid_token"])
             ->post('/user/logout');
 
-        $response->assertStatus(Response::HTTP_UNAUTHORIZED)->assertJsonStructure([
+        $response->assertUnauthorized()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -169,14 +227,14 @@ class UserTest extends TestCase
      *
      * @return void
      */
-    public function test_reset_password_with_valid_credentials(): void
+    public function test_reset_password_with_credentials(): void
     {
         $response = $this->withAuth()->post('/user/reset', [
             'newPassword' => 'ki7LPiwi--x=$ibRACRI',
             'oldPassword' => 'Passw0rd'
         ]);
 
-        $response->assertStatus(Response::HTTP_OK)->assertJsonStructure([
+        $response->assertOk()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -193,7 +251,7 @@ class UserTest extends TestCase
             'oldPassword' => 123
         ]);
 
-        $response->assertStatus(Response::HTTP_BAD_REQUEST)->assertJsonStructure([
+        $response->assertBadRequest()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -213,7 +271,7 @@ class UserTest extends TestCase
                 'oldPassword' => 'Passw0rd'
             ]);
 
-        $response->assertStatus(Response::HTTP_UNAUTHORIZED)->assertJsonStructure([
+        $response->assertUnauthorized()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -226,11 +284,11 @@ class UserTest extends TestCase
      *
      * @return void
      */
-    public function test_get_user_with_valid_credentials(): void
+    public function test_get_user_with_credentials(): void
     {
         $response = $this->withAuth()->get('/user');
 
-        $response->assertStatus(Response::HTTP_OK)->assertJsonStructure([
+        $response->assertOk()->assertJsonStructure([
             'type',
             'message',
             'user' => [
@@ -254,7 +312,7 @@ class UserTest extends TestCase
     {
         $response = $this->get('/user');
 
-        $response->assertStatus(Response::HTTP_UNAUTHORIZED)->assertJsonStructure([
+        $response->assertUnauthorized()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -267,7 +325,7 @@ class UserTest extends TestCase
      *
      * @return void
      */
-    public function test_update_user_with_valid_credentials_and_body(): void
+    public function test_update_user_with_credentials_and_body(): void
     {
         $response = $this->withAuth()->put('/user', [
             'name' => 'Test User',
@@ -275,7 +333,7 @@ class UserTest extends TestCase
             'preferred_contact' => 'phone'
         ]);
 
-        $response->assertStatus(Response::HTTP_OK)->assertJsonStructure([
+        $response->assertOk()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -294,7 +352,7 @@ class UserTest extends TestCase
             'preferred_contact' => 'phone'
         ]);
 
-        $response->assertStatus(Response::HTTP_BAD_REQUEST)->assertJsonStructure([
+        $response->assertBadRequest()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -313,7 +371,7 @@ class UserTest extends TestCase
             'preferred_contact' => 'phone'
         ]);
 
-        $response->assertStatus(Response::HTTP_UNAUTHORIZED)->assertJsonStructure([
+        $response->assertUnauthorized()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -326,11 +384,11 @@ class UserTest extends TestCase
      *
      * @return void
      */
-    public function test_delete_user_with_valid_credentials(): void
+    public function test_delete_user_with_credentials(): void
     {
         $response = $this->withAuth()->delete('/user');
 
-        $response->assertStatus(Response::HTTP_OK)->assertJsonStructure([
+        $response->assertOk()->assertJsonStructure([
             'type',
             'message'
         ]);
@@ -345,7 +403,7 @@ class UserTest extends TestCase
     {
         $response = $this->get('/user');
 
-        $response->assertStatus(Response::HTTP_UNAUTHORIZED)->assertJsonStructure([
+        $response->assertUnauthorized()->assertJsonStructure([
             'type',
             'message'
         ]);

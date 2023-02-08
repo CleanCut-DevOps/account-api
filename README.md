@@ -12,11 +12,11 @@ as implementing mechanisms for verifying users' identities, such as by using pas
 
 To get started, you'll need to have the following software installed on your local machine:
 
--   MySQL (local server or DBaaS)
--   PHP 8
--   Composer
+- MySQL (local server or DBaaS)
+- PHP 8
+- Composer
 
-Once you have MySQL, create a schema in the MySQL DB called `account`.
+Once you have MySQL, create a schema in the MySQL DB called `accounts`.
 
 Once you have PHP 8 and Composer installed, clone this repository to your local machine.
 
@@ -29,9 +29,7 @@ Next, navigate to the root directory of the project and install the dependencies
 ```bash
 $ cd account-api
 
-$ composer update
-
-$ composer install
+$ composer install -q -n --no-ansi --no-scripts --no-progress --prefer-dist
 ```
 
 Next, copy the `.env.example` file to `.env`.
@@ -50,13 +48,13 @@ $ cp .env.example .env
 
 $ php artisan key:generate
 
-$ php artisan config:cache
+$ php artisan optimize
 ```
 
-Next, run the database migrations to create the tables in the database.
+Next, run the database migration to create the tables in the database.
 
 ```bash
-$ php artisan migrate:fresh
+$ php artisan migrate:fresh --seed
 ```
 
 Finally, start the development server.
@@ -66,3 +64,5 @@ $ php artisan serve --port=8001
 ```
 
 The application will now be running on http://localhost:8001.
+
+If you're running this on a server, point the server to the entry point: `public/index.php`.

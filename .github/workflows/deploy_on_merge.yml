@@ -64,7 +64,6 @@ jobs:
             cd /var/www/account-api
             git pull origin main
             composer install -q -n --no-ansi --no-scripts --no-progress --prefer-dist
-            echo APP_ENV=production > .env
             echo APP_KEY= >> .env
             echo APP_URL="${{ secrets.APP_URL }}" >> .env
             echo DB_HOST="${{ secrets.DB_HOST }}" >> .env

@@ -25,7 +25,7 @@ jobs:
 
       - name: Run composer install
         run: |
-          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          composer install -q -n --no-ansi --no-scripts --no-progress --prefer-dist
 
       - name: Initialize env
         run: |
@@ -42,7 +42,7 @@ jobs:
           echo MAIL_FROM_ADDRESS="${{ secrets.MAIL_FROM_ADDRESS }}" >> .env
           echo MAIL_FROM_NAME=KLENZE >> .env
           echo JWT_SECRET="${{ secrets.JWT_SECRET }}" >> .env
-          php artisan config:cache
+          php artisan optimize
 
       - name: Run tests
-        run: php artisan test
+        run: php artisan test --without-tty
